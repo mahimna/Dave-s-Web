@@ -37,9 +37,6 @@ public class MahimnaArrayAdapter extends ArrayAdapter<Object> {
 		BookDataContainer cur_book = (BookDataContainer) cur_obj;
 		
 	    // Set the timestamp in the listview 
-		
-		//Time stamp = new Time(Time.getCurrentTimezone());
-		//stamp.setToNow();
 		timeStamp.setText(cur_book.time_stamp);
 		 
 		// Set the book title in the listview 

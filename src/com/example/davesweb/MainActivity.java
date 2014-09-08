@@ -20,11 +20,16 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		IOControl io = new IOControl("Storage.txt",this);
+		if(io.fileExistance()){
+			Intent intent = new Intent(MainActivity.this, ListViewControl.class);
+			startActivity(intent);
+		}		
 		authorName = (EditText) findViewById(R.id.authorName);
 		getBooks = (Button) findViewById(R.id.getBooks);
 		getBooks.setOnClickListener(this);
+		
 	}
-
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

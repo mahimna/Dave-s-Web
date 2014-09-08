@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,48 +31,58 @@ public class ListViewControl extends Activity {
 		
 		Intent intent = getIntent();		
 		String author = "";
-		if(intent.hasExtra("author_name")){
-			author = intent.getStringExtra("author_name");
-			if(author.contains(" ")) author = author.replaceAll(" ", "%20");
+		
+		IOControl io = new IOControl(storageFile,this);		
+		if(!io.fileExistance()){		
+			if(intent.hasExtra("author_name")){
+				author = intent.getStringExtra("author_name");
+				if(author.contains(" ")) author = author.replaceAll(" ", "%20");
+			}		
+			GetInformationFromWeb task = new GetInformationFromWeb(this);
+			task.execute(author);
+		}
+		else {
+			list = io.readFromFile();
+			final ListView listview = (ListView) findViewById(R.id.listView);
+			final MahimnaArrayAdapter adapter = new MahimnaArrayAdapter(ListViewControl.this, R.layout.listview_item, list);
+			listview.setAdapter(adapter);
 		}
 		
-		GetInformationFromWeb task = new GetInformationFromWeb();
-		task.execute(author);			
+		
 	}
-	
-	
 	
 	@Override
 	protected void onRestart() {
 		// TODO Auto-generated method stub
 		super.onRestart();
-		IOControl io = new IOControl(storageFile);
+		IOControl io = new IOControl(storageFile,this);
 		if (io.fileExistance()){
 		list = io.readFromFile();
 		}		
 	}
 
-
-
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		IOControl io = new IOControl(storageFile);
+		IOControl io = new IOControl(storageFile,this);
 		if (io.fileExistance()){
 			list = io.readFromFile();
 		}
 	}
 
-	
-
-
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		File file = new File(storageFile);
-		file.delete();
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		IOControl io = new IOControl(storageFile,this);
+		io.deleteFile();		
+		super.onBackPressed();
 	}
 
 	class GetInformationFromWeb extends AsyncTask <String,Void,List<Object>> {
@@ -80,7 +91,12 @@ public class ListViewControl extends Activity {
 		String author_name;
 		String url_api = "&apikey=p9k29um2t95hgdzb943njgxy";
 		private ProgressDialog pDialog;
+		private Context context;
 		
+		public GetInformationFromWeb(Context contxt){
+			context = contxt;
+		}
+			
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
@@ -92,8 +108,7 @@ public class ListViewControl extends Activity {
 			if(!this.pDialog.isShowing()){
 	            this.pDialog.show();
 	        }
-		}
-			
+		}			
 		@Override
 		protected List<Object> doInBackground(String... params) {
 			// TODO Auto-generated method stub
@@ -129,7 +144,6 @@ public class ListViewControl extends Activity {
 			
 			return null;
 		}
-
 		@Override
 		protected void onPostExecute(List<Object> result) {
 			// TODO Auto-generated method stub
@@ -137,18 +151,13 @@ public class ListViewControl extends Activity {
 			pDialog.dismiss();
 			final ListView listview = (ListView) findViewById(R.id.listView);
 			list = result;
-			IOControl io = new IOControl(storageFile);
+			IOControl io = new IOControl(storageFile,context);
 			io.writeToFile(list);
 			final MahimnaArrayAdapter adapter = new MahimnaArrayAdapter(ListViewControl.this, R.layout.listview_item, list);
 			listview.setAdapter(adapter);
 		}
-		
-		
-		
-	}	
-	
-	
-		
+				
+	}			
 }
 
 
